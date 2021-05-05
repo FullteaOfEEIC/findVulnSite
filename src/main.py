@@ -16,7 +16,10 @@ domains += sublist3r.main(domain,threads,None,None,None,None,False,None) #そこ
 
 addrs = []
 for _domain in domains:
-    addrs += socket.gethostbyname_ex(_domain)[2]
+    try:
+        addrs += socket.gethostbyname_ex(_domain)[2]
+    except:
+        pass
 
 
 for domain in domains:
