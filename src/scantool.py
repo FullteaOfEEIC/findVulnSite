@@ -1,16 +1,15 @@
 import nmap
-import requests
-from copy import copy, deepcopy
 import re
 import subprocess
 import uuid
-from tqdm.auto import tqdm
-from parallel_requests.session import extended_session
-from multiprocessing import cpu_count
 import os
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
+import docx
+from docx.shared import Inches
 
-def dirb(domain, wordlist="/usr/share/dirb/wordlists/big.txt"):
-    if re.match("https?://",domain):
+def dirb(domain, wordlist="/usr/share/dirb/wordlists/common.txt"):
+    if re.match("^https?:\/\/",domain):
         domains = [domain]
     else:
         domains = ["http://"+domain,"https://"+domain]
@@ -27,8 +26,35 @@ def dirb(domain, wordlist="/usr/share/dirb/wordlists/big.txt"):
         os.remove(random_name)
 
 
-    return retval
+    return set(retval)
+
+def nikto(url):
+    random_name = str(uuid.uuid4())+".txt"
+    subprocess.run(["nikto", "-h", url, "-o", random_name])
+    return "\n".join(open(random_name,"r").readlines())
 
 
 def scan(addr, output="result"):
-    pass
+    urls = dirb(addr)
+    options = Options()
+    options.headless = True
+    driver = webdriver.Firefox(options=options)
+    imagenames = []
+    for url in urls:
+        driver.get(url)
+        driver.set_window_size(1920,1080)
+        filename = re.sub("^https?:\/\/","",url)
+        filename = filename.replace("/","-")+".png"
+        driver.save_screenshot(filename)
+        imagenames.append(filename)
+    driver.close()
+    nikto_results = [nikto(url) for url in urls]
+    doc = docx.Document()
+    for url, imagename, nikto_result in zip(urls, imagenames, nikto_results):
+        doc.add_heading(url,0)
+        doc.add_picture(imagename, width=Inches(8.27*0.7))
+        doc.add_heading("nikto",1)
+        doc.add_paragraph(nikto_result)
+        doc.add_page_break()
+    doc.save("/mnt/report.docx")
+

@@ -3,7 +3,6 @@ FROM ubuntu:18.04
 LABEL author frt@frt.hongo.wide.ad.jp
 ARG PYTHON_VERSION=3.9.1
 
-
 RUN apt update && apt upgrade -y
 RUN DEBIAN_FRONTEND=noninteractive apt install -y\
  make\
@@ -25,7 +24,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt install -y\
  git\
  nikto\
  dirb\
- nmap
+ nmap\
+ firefox-geckodriver
 
 RUN git clone https://github.com/pyenv/pyenv.git /.pyenv && sh /.pyenv/plugins/python-build/install.sh && rm -rf /.pyenv
 RUN mkdir /python && /usr/local/bin/python-build -v ${PYTHON_VERSION} /python
@@ -39,7 +39,8 @@ RUN pip install\
  tqdm\
  requests\
  tqdm\
- parallel-requests
+ selenium\
+ python-docx
 
 RUN git clone https://github.com/aboul3la/Sublist3r.git
 RUN pip install -r Sublist3r/requirements.txt
