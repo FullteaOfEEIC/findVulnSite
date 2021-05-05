@@ -6,6 +6,7 @@ from chardet.universaldetector import UniversalDetector
 from tqdm.auto import tqdm
 from parallel_requests.session import extended_session
 from multiprocessing import cpu_count
+import time
 
 def check_encoding(file_path):
     detector = UniversalDetector()
@@ -22,7 +23,7 @@ def dirb(domain, wordlist="/usr/share/dirb/wordlists/common.txt"):
     with open(wordlist, "r", encoding=encoding) as fp:
         words = [word.strip() for word in fp]
     if re.match("https?://",domain):
-        uris = [domain]
+        urls = [domain]
     else:
         urls = ["http://"+domain, "https://"+domain]
     retval = copy(urls)
@@ -33,7 +34,6 @@ def dirb(domain, wordlist="/usr/share/dirb/wordlists/common.txt"):
         method_args = [{"url":candidate+"/"+word, "method":"get"} for word in words]
         for batch in tqdm(range(0, len(method_args), batch_size)):
             with extended_session() as session:
-                #print(deepcopy(method_args[batch:batch+batch_size]))
                 _responses = session.parallel_request(
                     method_args=method_args[batch:batch+batch_size],
                     max_workers=cpu_count()*5
@@ -44,6 +44,7 @@ def dirb(domain, wordlist="/usr/share/dirb/wordlists/common.txt"):
                 print(method["url"], response.status_code)
                 retval.append(method["url"])
                 urls.append(method["url"])
+        time.sleep(3)
 
     return retval
 

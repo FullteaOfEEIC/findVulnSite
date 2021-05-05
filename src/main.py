@@ -6,7 +6,7 @@ import socket
 import os
 from scantool import scan, dirb
 
-domain = "frt.hongo.wide.ad.jp"
+domain = sys.argv[1]
 threads = 30
 
 domains = [domain]
