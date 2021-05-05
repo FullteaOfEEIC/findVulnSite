@@ -1,10 +1,11 @@
 import nmap
 import requests
-from copy import copy
+from copy import copy, deepcopy
 import re
 from chardet.universaldetector import UniversalDetector
 from tqdm.auto import tqdm
 from parallel_requests.session import extended_session
+from multiprocessing import cpu_count
 
 def check_encoding(file_path):
     detector = UniversalDetector()
@@ -16,7 +17,7 @@ def check_encoding(file_path):
     detector.close()
     return detector.result['encoding']
 
-def dirb(domain, wordlist="/usr/share/dirb/wordlists/big.txt"):
+def dirb(domain, wordlist="/usr/share/dirb/wordlists/common.txt"):
     encoding = check_encoding(wordlist)
     with open(wordlist, "r", encoding=encoding) as fp:
         words = [word.strip() for word in fp]
@@ -25,14 +26,19 @@ def dirb(domain, wordlist="/usr/share/dirb/wordlists/big.txt"):
     else:
         urls = ["http://"+domain, "https://"+domain]
     retval = copy(urls)
+    batch_size = 8
     while len(urls)>0:
         candidate = urls.pop(0)
+        responses = []
         method_args = [{"url":candidate+"/"+word, "method":"get"} for word in words]
-        with extended_session() as session:
-            responses = session.parallel_request(
-                method_args=method_args,
-                max_workers=5
-            )
+        for batch in tqdm(range(0, len(method_args), batch_size)):
+            with extended_session() as session:
+                #print(deepcopy(method_args[batch:batch+batch_size]))
+                _responses = session.parallel_request(
+                    method_args=method_args[batch:batch+batch_size],
+                    max_workers=cpu_count()*5
+                )
+            responses += _responses
         for response, method in zip(responses, method_args):
             if response.status_code!=404:
                 print(method["url"], response.status_code)
