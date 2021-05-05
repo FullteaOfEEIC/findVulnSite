@@ -17,7 +17,7 @@ def check_encoding(file_path):
     detector.close()
     return detector.result['encoding']
 
-def dirb(domain, wordlist="/usr/share/dirb/wordlists/common.txt"):
+def dirb(domain, wordlist="/usr/share/dirb/wordlists/big.txt"):
     encoding = check_encoding(wordlist)
     with open(wordlist, "r", encoding=encoding) as fp:
         words = [word.strip() for word in fp]
@@ -27,8 +27,7 @@ def dirb(domain, wordlist="/usr/share/dirb/wordlists/common.txt"):
         urls = ["http://"+domain]
     retval = copy(urls)
     batch_size = 16
-    while len(urls)>0:
-        candidate = urls.pop(0)
+    for candidate in urls:
         responses = []
         method_args = [{"url":candidate+"/"+word, "method":"get"} for word in words]
         for batch in tqdm(range(0, len(method_args), batch_size)):
@@ -42,8 +41,6 @@ def dirb(domain, wordlist="/usr/share/dirb/wordlists/common.txt"):
             if response.status_code!=404:
                 print(method["url"], response.status_code)
                 retval.append(method["url"])
-                if response.status_code==200:
-                    urls.append(method["url"])
 
     return retval
 

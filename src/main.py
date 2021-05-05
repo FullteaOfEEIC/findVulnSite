@@ -20,5 +20,6 @@ for _domain in domains:
 
 
 for domain in domains:
-    dirb(domain)
+    urls = dirb(domain)
+    print(urls)
 #os.mkdir("result")
