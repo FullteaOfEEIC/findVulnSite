@@ -2,53 +2,29 @@ import nmap
 import requests
 from copy import copy, deepcopy
 import re
-from chardet.universaldetector import UniversalDetector
+import subprocess
+import uuid
 from tqdm.auto import tqdm
 from parallel_requests.session import extended_session
 from multiprocessing import cpu_count
 
-def check_encoding(file_path):
-    detector = UniversalDetector()
-    with open(file_path, mode='rb') as f:
-        for binary in f:
-            detector.feed(binary)
-            if detector.done:
-                break
-    detector.close()
-    return detector.result['encoding']
 
 def dirb(domain, wordlist="/usr/share/dirb/wordlists/big.txt"):
-    encoding = check_encoding(wordlist)
-    with open(wordlist, "r", encoding=encoding) as fp:
-        words = [word.strip() for word in fp]
     if re.match("https?://",domain):
-        urls = [domain]
+        domains = [domain]
     else:
-        urls = ["http://"+domain]
-    retval = copy(urls)
-    batch_size = 32
-    for candidate in urls:
-        responses = []
-        method_args = [{"url":candidate+"/"+word, "method":"get"} for word in words]
-        for batch in tqdm(range(0, len(method_args), batch_size)):
-            try:
-                with extended_session() as session:
-                    _responses = session.parallel_request(
-                        method_args=method_args[batch:batch+batch_size],
-                        max_workers=cpu_count()*5
-                    )
-                responses += _responses
-            except:
-                for arg in method_args[batch:batch_size]:
-                    try:
-                        response = requests.get(arg["url"])
-                        responses.append(response)
-                    except:
-                        pass
-        for response, method in zip(responses, method_args):
-            if response.status_code!=404:
-                print(method["url"], response.status_code)
-                retval.append(method["url"])
+        domains = ["http://"+domain,"https://"+domain]
+    retval = []
+    dirb_retval = re.compile("^\+ (https?://.+) (CODE:\d+|SIZE:\d+)$")
+    for domain in domains:
+        random_name = str(uuid.uuid4())
+        subprocess.run(["dirb", domain, "-o", random_name,"-w"])
+        with open(random_name,"r") as fp:
+            for line in fp:
+                match = re.match(line.strip())
+                if match:
+                    retval.append(match.group(1))
+
 
     return retval
 
