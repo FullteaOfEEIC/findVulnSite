@@ -12,16 +12,16 @@ def dirb(domain, wordlist="/usr/share/dirb/wordlists/common.txt"):
     if re.match("^https?:\/\/",domain):
         domains = [domain]
     else:
-        domains = ["http://"+domain,"https://"+domain]
+        domains = ["https://"+domain, "http://"+domain]
     retval = []
-    dirb_retval = re.compile("^\+ (https?:\/\/.+) \(CODE:\d+\|SIZE:\d+\)$")
+    dirb_retval = re.compile("^\+ (https?:\/\/.+) \(CODE:(\d+)\|SIZE:\d+\)$")
     for domain in domains:
         random_name = str(uuid.uuid4())
         subprocess.run(["dirb", domain, "-o", random_name,"-w"])
         with open(random_name,"r") as fp:
             for line in fp:
                 match = dirb_retval.match(line.strip())
-                if match:
+                if match and int(match.group(2))!=301:
                     retval.append(match.group(1))
         os.remove(random_name)
 
@@ -56,5 +56,5 @@ def scan(addr, output="result"):
         doc.add_heading("nikto",1)
         doc.add_paragraph(nikto_result)
         doc.add_page_break()
-    doc.save("/mnt/report.docx")
+    doc.save("/mnt/{0}.docx".format(addr))
 
