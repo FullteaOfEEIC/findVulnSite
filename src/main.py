@@ -11,9 +11,10 @@ threads = 30
 
 domains = []
 for _domain in _domains:
-    domains.append(_domain)
     if _domain.split(".")[0]=='*':
         domains += sublist3r.main(_domain,threads,None,None,None,None,False,None) #そこそこの確率で活きていないサブドメインが含まれている。
+    else:
+        domains.append(_domain)
 
 
 addrs = []
