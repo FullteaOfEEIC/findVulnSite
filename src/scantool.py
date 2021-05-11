@@ -17,7 +17,7 @@ def dirb(domain, wordlist="/usr/share/dirb/wordlists/common.txt"):
     dirb_retval = re.compile("^\+ (https?:\/\/.+) \(CODE:(\d+)\|SIZE:\d+\)$")
     for domain in domains:
         random_name = str(uuid.uuid4())
-        subprocess.run(["dirb", domain, "-o", random_name,"-w"])
+        subprocess.run(["dirb", domain, "-o", random_name,"-w","-r"])
         with open(random_name,"r") as fp:
             for line in fp:
                 match = dirb_retval.match(line.strip())
