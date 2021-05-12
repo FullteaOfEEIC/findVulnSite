@@ -12,19 +12,13 @@ threads = 30
 domains = []
 for _domain in _domains:
     if _domain.split(".")[0]=='*':
-        domains += sublist3r.main(_domain,threads,None,None,None,None,False,None) #そこそこの確率で活きていないサブドメインが含まれている。
+        domains += sublist3r.main(_domain[2:],threads,None,None,None,None,False,None) #そこそこの確率で活きていないサブドメインが含まれている。
     else:
         domains.append(_domain)
 
 
-addrs = []
-for _domain in domains:
-    try:
-        addrs += socket.gethostbyname_ex(_domain)[2]
-    except:
-        pass
+
 
 
 for domain in domains:
     scan(domain)
-#os.mkdir("result")

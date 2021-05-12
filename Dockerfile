@@ -25,7 +25,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt install -y\
  nikto\
  dirb\
  nmap\
- firefox-geckodriver
+ firefox-geckodriver\
+ sudo
 
 RUN git clone https://github.com/pyenv/pyenv.git /.pyenv && sh /.pyenv/plugins/python-build/install.sh && rm -rf /.pyenv
 RUN mkdir /python && /usr/local/bin/python-build -v ${PYTHON_VERSION} /python
@@ -40,12 +41,15 @@ RUN pip install\
  requests\
  tqdm\
  selenium\
- python-docx
+ python-docx\
+ timeout_decorator
 
 RUN git clone https://github.com/aboul3la/Sublist3r.git
 RUN pip install -r Sublist3r/requirements.txt
 
 ADD src /
 ADD datasets /datasets
+ADD assets /assets
 
-CMD python
+ENTRYPOINT ["python", "main.py"]
+CMD ["127.0.0.1"]
