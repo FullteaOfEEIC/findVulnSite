@@ -15,7 +15,7 @@ import requests
 def _dirb(domain, wordlist):
 
     dirb_format = re.compile("^\+ (https?:\/\/.+) \(CODE:(\d+)\|SIZE:\d+\)$")
-    dirb_format_dir = re.compile("^==> DIRECTORY: (https?://.+)$")
+    #dirb_format_dir = re.compile("^==> DIRECTORY: (https?://.+)$")
     retval = []
     random_name = str(uuid.uuid4())
     subprocess.run(["dirb", domain, "-o", random_name,"-w"])
@@ -24,9 +24,9 @@ def _dirb(domain, wordlist):
             match = dirb_format.match(line.strip())
             if match and int(match.group(2))!=301:
                 retval.append(match.group(1))
-            match = dirb_format_dir.match(line.strip())
-            if match:
-                retval.append(match.group(1))
+            #match = dirb_format_dir.match(line.strip())
+            #if match:
+                #retval.append(match.group(1))
     os.remove(random_name)
 
     return list(set(retval))
@@ -67,7 +67,7 @@ def portscan(addr):
     print("port scannning...")
     ps = nmap.PortScanner()
     addr = socket.gethostbyname(addr)
-    nmap_result = ps.scan(addr, "1-65535", arguments="-Pn -sS -T5 -A")
+    nmap_result = ps.scan(addr, arguments="-Pn -sS -T5 -A")
     print(ps.command_line())
     return nmap_result["scan"][addr]["tcp"]
 
