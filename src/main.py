@@ -16,8 +16,14 @@ for _domain in _domains:
     else:
         domains.append(_domain)
 
+def domain_exists(domain):
+    try:
+        socket.gethostbyname(domain)
+        return True
+    except:
+        return False
 
-
+domains = [domain for domain in domains if domain_exists(domain)]
 
 
 for domain in domains:
