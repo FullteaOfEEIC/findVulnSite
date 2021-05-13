@@ -69,7 +69,10 @@ def portscan(addr):
     addr = socket.gethostbyname(addr)
     nmap_result = ps.scan(addr, arguments="-Pn -sS -T5 -A")
     print(ps.command_line())
-    return nmap_result["scan"][addr]["tcp"]
+    try:
+        return nmap_result["scan"][addr]["tcp"]
+    except KeyError:
+        return {}
 
 def request_check(url_cand):
     try:
