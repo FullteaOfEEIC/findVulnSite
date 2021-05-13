@@ -119,5 +119,6 @@ def scan(addr, output="result"):
         doc.add_heading("nikto",1)
         doc.add_paragraph(nikto_results[url])
         doc.add_page_break()
+    doc.add_paragraph("scan done")
     doc.save("/mnt/{0}.docx".format(addr))
 
