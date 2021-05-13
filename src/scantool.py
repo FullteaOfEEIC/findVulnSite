@@ -98,12 +98,14 @@ def scan(addr, output="result"):
     doc.add_paragraph(portscan_str(nmap_result))
     doc.add_page_break()
     for port in nmap_result:
-        url = "http://{0}:{1}".format(addr, port)
-        if request_check(url):
-            urls += dirb(url)
-        url = "https://{0}:{1}".format(addr, port)
-        if request_check(url):
-            urls += dirb(url)
+        if port!=443:
+            url = "http://{0}:{1}".format(addr, port)
+            if request_check(url):
+                urls += dirb(url)
+        if port!=80:
+            url = "https://{0}:{1}".format(addr, port)
+            if request_check(url):
+                urls += dirb(url)
     screenshots = {url:get_screenshot(url) for url in urls}
     nikto_results = {url:nikto(url) for url in urls}
 

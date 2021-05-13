@@ -26,7 +26,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt install -y\
  dirb\
  nmap\
  firefox-geckodriver\
- sudo
+ sudo\
+ fonts-ipa*
 
 RUN git clone https://github.com/pyenv/pyenv.git /.pyenv && sh /.pyenv/plugins/python-build/install.sh && rm -rf /.pyenv
 RUN mkdir /python && /usr/local/bin/python-build -v ${PYTHON_VERSION} /python
