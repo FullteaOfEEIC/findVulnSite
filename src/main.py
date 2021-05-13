@@ -5,6 +5,8 @@ import sublist3r
 import socket
 import os
 from scantool import scan, dirb
+from multiprocessing import Pool
+from tqdm.auto import tqdm
 
 _domains = sys.argv[1:]
 threads = 30
@@ -26,5 +28,7 @@ def domain_exists(domain):
 domains = [domain for domain in domains if domain_exists(domain)]
 
 
-for domain in domains:
-    scan(domain)
+if __name__=="__main__":
+    with Pool() as p:
+        imap = p.imap(scan, domains)
+        list(tqdm(imap, total = len(domains)))
